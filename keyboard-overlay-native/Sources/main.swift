@@ -3,8 +3,8 @@ import ApplicationServices
 import WebKit
 import IOKit.hid
 
-// Wide enough for the keyboard (incl. arrow cluster, ~538pt) + mouse + padding.
-let overlayWidth: CGFloat = 700
+// Wide enough for the keyboard + the arrow/mouse-button cluster (~538pt) + padding.
+let overlayWidth: CGFloat = 580
 let overlayHeight: CGFloat = 300
 
 // Neither print() nor NSLog reliably showed up in `log stream` for a

@@ -1,8 +1,8 @@
 # Keyboard Overlay (native)
 
-A transparent, click-through, always-on-top overlay that shows a keyboard and
-mouse and highlights keys/buttons live as you press them — useful for
-streaming or recording tutorials.
+A transparent, click-through, always-on-top overlay that shows a keyboard, arrow
+keys and left/right mouse buttons, and highlights them live as you press
+them — useful for streaming or recording tutorials.
 
 Native Swift/AppKit app (a `WKWebView` hosting the visual layer, driven by
 Apple's own `NSEvent.addGlobalMonitorForEvents` for global key/mouse

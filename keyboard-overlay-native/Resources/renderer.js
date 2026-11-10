@@ -4,7 +4,7 @@ document.querySelectorAll('.key[data-key]').forEach((el) => {
 });
 
 const mouseButtonElements = new Map();
-document.querySelectorAll('.mouse-btn[data-button]').forEach((el) => {
+document.querySelectorAll('.key[data-button]').forEach((el) => {
   mouseButtonElements.set(el.dataset.button, el);
 });
 
