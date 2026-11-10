@@ -79,6 +79,17 @@ body.movable .overlay {
   width: calc(var(--key-size) * 4 + var(--gap) * 3);
 }
 
+/* Pushes the Up arrow (bottom-but-one row) over the Down arrow (bottom row):
+   Down's left edge sits 8.4 keys + 9 gaps in from the row start, Up's natural
+   position after B is 6.7 keys + 7 gaps in, so the difference is 1.7 keys + 2 gaps. */
+.key.arrow-up {
+  margin-left: calc(var(--key-size) * 1.7 + var(--gap) * 2);
+}
+
+.key[data-key^="Arrow"] {
+  font-size: 18px;
+}
+
 .key.active {
   background: var(--accent);
   border-color: var(--accent);

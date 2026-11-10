@@ -3,7 +3,8 @@ import ApplicationServices
 import WebKit
 import IOKit.hid
 
-let overlayWidth: CGFloat = 620
+// Wide enough for the keyboard (incl. arrow cluster, ~538pt) + mouse + padding.
+let overlayWidth: CGFloat = 700
 let overlayHeight: CGFloat = 300
 
 // Neither print() nor NSLog reliably showed up in `log stream` for a
@@ -38,9 +39,10 @@ let keyCodeToName: [UInt16: String] = [
   0x38: "Shift", 0x3C: "Shift",
   0x3A: "Alt", 0x3D: "Alt",
   0x3B: "Ctrl", 0x3E: "Ctrl",
+  0x7B: "ArrowLeft", 0x7C: "ArrowRight", 0x7D: "ArrowDown", 0x7E: "ArrowUp",
 ]
 
-let controlBarWidth: CGFloat = 108
+let controlBarWidth: CGFloat = 56
 let controlBarHeight: CGFloat = 26
 
 let defaultAccentColor = NSColor(red: 199.0 / 255, green: 201.0 / 255, blue: 52.0 / 255, alpha: 1)
@@ -60,10 +62,10 @@ extension NSColor {
 }
 
 // Purely decorative background for the control bar (rounded rect + three
-// drag dots, centered between the real macOS close button on the left and
-// the settings gear button on the right). Deliberately has NO event-
-// handling code — dragging is handled entirely by the window's own
-// isMovableByWindowBackground, the standard AppKit mechanism for this.
+// drag dots on the left, with the settings gear button on the right).
+// Deliberately has NO event-handling code — dragging is handled entirely by
+// the window's own isMovableByWindowBackground, the standard AppKit
+// mechanism for this.
 final class ControlBarView: NSView {
   override func draw(_ dirtyRect: NSRect) {
     let background = NSBezierPath(roundedRect: bounds, xRadius: 6, yRadius: 6)
@@ -76,7 +78,7 @@ final class ControlBarView: NSView {
     NSColor.white.withAlphaComponent(0.8).setFill()
     let dotSize: CGFloat = 3
     let y = bounds.midY - dotSize / 2
-    let startX = bounds.midX - (dotSize * 3 + 3 * 2) / 2
+    let startX: CGFloat = 12
     for i in 0..<3 {
       let dotRect = NSRect(x: startX + CGFloat(i) * (dotSize + 3), y: y, width: dotSize, height: dotSize)
       NSBezierPath(ovalIn: dotRect).fill()
@@ -152,8 +154,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
   }
 
   // A small always-interactive window docked at the overlay's top-left
-  // corner: drag anywhere on it to move the whole overlay, click the red
-  // circle to quit. Kept as a separate window (rather than baked into the
+  // corner: drag anywhere on it to move the whole overlay, click the gear
+  // for settings. Kept as a separate window (rather than baked into the
   // click-through main window) since ignoresMouseEvents is all-or-nothing
   // per window on macOS.
   //
@@ -192,6 +194,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
     )
     controlBarWindow.titlebarAppearsTransparent = true
     controlBarWindow.titleVisibility = .hidden
+    // Hide the three traffic-light circles (close / minimize / zoom). Quitting
+    // now goes through the menu-bar ⌨ item instead; the bar is just a drag
+    // handle + settings gear.
+    for button in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
+      controlBarWindow.standardWindowButton(button)?.isHidden = true
+    }
     controlBarWindow.isOpaque = false
     controlBarWindow.backgroundColor = .clear
     controlBarWindow.hasShadow = true
@@ -230,8 +238,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
     controlBarWindow.orderFrontRegardless()
   }
 
-  // The real close button (wired automatically by AppKit) closes this
-  // window, which fires this delegate method — used to quit the whole app.
+  // Safety net: if the control bar window ever closes (the visible close
+  // button is hidden now), quit too — otherwise the click-through overlay
+  // would be left running with no way to drag or dismiss it.
   func windowWillClose(_ notification: Notification) {
     guard notification.object as? NSWindow === controlBarWindow else { return }
     debugLog("[keyboard-overlay] control bar closed, quitting")
